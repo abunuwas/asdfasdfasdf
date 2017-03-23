@@ -1,31 +1,10 @@
-from flask import abort, request
+from flask import request
 from flask_restful import Resource, reqparse, fields, marshal
 
-from src.Auth import auth
-from src.configReader import ConfigReader
+from Auth import auth
+from configReader import ConfigReader
 
-device_template_list = [
-    {
-        'gateway_device_id': '1',
-        'mac': 'FF987654321E',
-        'template_name': 'template_name1',
-        'template_properties':
-        {
-            'prop_name1': 'prop_value1',
-            'prop_name2': 'prop_value2'
-        }
-    },
-    {
-        'gateway_device_id': '2',
-        'mac': 'AA123456789B',
-        'template_name': u'template_name2',
-        'template_properties':
-        {
-            'prop_name1': 'prop_value1',
-            'prop_name2': 'prop_value2'
-        }
-    }
-]
+device_template_list = []
 
 device_template_fields = {
     'gateway_device_id': fields.String,
@@ -47,9 +26,9 @@ class DeviceTemplates(Resource):
     def get(self):
 
         # TODO return all device templates
-        if ConfigReader.read_config_value('application-config', 'TestAPIController') == 'True':
+        if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') == 'True':
             # Disallow if is TestAPIController Config
-            abort(400)
+            return 'Method not supported for controller type', 400
 
         return {'DeviceTemplates': [marshal(device_template, device_template_fields)
                                     for device_template in device_template_list]}
@@ -57,9 +36,9 @@ class DeviceTemplates(Resource):
     def post(self, gateway_device_id, template_name):
 
         # TODO create new device template
-        if ConfigReader.read_config_value('application-config', 'TestAPIController') == 'True':
+        if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') == 'True':
             # Disallow if is TestAPIController Config
-            abort(400)
+            return 'Method not supported for controller type', 400
 
         args = self.reqparse.parse_args()
 
@@ -86,9 +65,9 @@ class DeviceTemplate(Resource):
     def put(self, gateway_device_id, template_name):
 
         # TODO update template properties
-        if ConfigReader.read_config_value('application-config', 'TestAPIController') == 'True':
+        if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') == 'True':
             # Disallow if is TestAPIController Config
-            abort(400)
+            return 'Method not supported for controller type', 400
 
         self.reqparse.parse_args()
 

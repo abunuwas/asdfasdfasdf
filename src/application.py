@@ -4,9 +4,10 @@ import sys
 from flask import Flask, jsonify, make_response
 from flask_restful import Api
 
-from src.GatewayDevice import GatewayDevices, GatewayDevice
-from src.DeviceTemplate import DeviceTemplates, DeviceTemplate
-from src.LocalDevice import LocalDevices, LocalDevice
+from GatewayDevice import GatewayDevices, GatewayDevice
+from DeviceTemplate import DeviceTemplates, DeviceTemplate
+from LocalDevice import LocalDevices, LocalDevice
+from configReader import ConfigReader
 
 app = Flask(__name__, static_url_path="")
 api = Api(app)
@@ -33,5 +34,10 @@ api.add_resource(LocalDevices, '/localdevices/<string:gateway_device_id>', endpo
 api.add_resource(LocalDevice, '/localdevices/<string:gateway_device_id>/<string:local_device_id>',
                  endpoint='localdevice')
 
+if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') == 'True':
+    port = ConfigReader.read_config_value('INSTANCETYPE', 'APIControllerPort')
+else:
+    port = ConfigReader.read_config_value('INSTANCETYPE', 'ContainerHostPort')
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run(host='0.0.0.0', debug=True, port=int(port))
