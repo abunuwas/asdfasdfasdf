@@ -1,9 +1,16 @@
-import docker, requests, time, json
-from flask import request
+import docker
+import requests
+import time
+import json
+import subprocess
+
+from flask import request, abort
 from flask_restful import Resource, reqparse, fields, marshal
 
 from Auth import auth
 from configReader import ConfigReader
+
+import Decorators
 
 gateway_device_list = []
 
@@ -42,19 +49,21 @@ class GatewayDevices(Resource):
 
     def post(self):
 
-        is_test_controller = ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController')
+        is_test_controller = ConfigReader.read_config_value('INSTANCETYPE', 'IsTestAPIController')
 
         args = self.reqparse.parse_args()
         container_host_port = ConfigReader.read_config_value('INSTANCETYPE', 'ContainerHostPort')
         container_local_port = args['container_port']
+        container_name = args['docker_image'] + '_' + str(container_local_port)
 
         gateway_device = {
-            'gateway_device_id': args['docker_image'] + '_' + str(container_local_port),
+            'gateway_device_id': container_name,
             'mac': args['mac'],
             'docker_image': args['docker_image'],
             'firmware_version': args['firmware_version'],
             'agent_type': args['agent_type'],
-            'container_port': container_local_port
+            'container_port': container_local_port,
+            'gateway_properties': {}
         }
 
         if is_test_controller == 'True':
@@ -63,20 +72,21 @@ class GatewayDevices(Resource):
 
             client.containers.run(args['docker_image'],
                                   detach=True,
-                                  name=args['docker_image'] + '_' + str(container_local_port),
+                                  name=container_name,
                                   ports={str(container_host_port) + '/tcp': int(container_local_port)}
                                   )
 
-            #give the container a chance to start before calling it
-            time.sleep(3)
+            # give the container a chance to start before calling it
+            while subprocess.check_output(["/usr/bin/docker", "inspect",  "-f", "{{.State.Health.Status}}", container_name]) != b"healthy\n":
+                time.sleep(1)
 
             url = ConfigReader.read_config_value('INSTANCETYPE', 'APIControllerUri') + ':' \
-                  + str(container_local_port) \
-                  + '/gatewaydevices'
+                + str(container_local_port) \
+                + '/gatewaydevices'
 
             response = requests.post(url, data=json.dumps(gateway_device), headers=request.headers)
 
-            #add the gateway to this controller's list of gateway\containers
+            # add the gateway to this controller's list of gateway\containers
             gateway_device_list.append(gateway_device)
 
             return response.json(), 201
@@ -87,11 +97,8 @@ class GatewayDevices(Resource):
 
             return {'GatewayDevice': marshal(gateway_device, gateway_device_fields)}, 201
 
+    @Decorators.api_controller_type_verifier('True')
     def delete(self):
-
-        if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') != 'True':
-            # Allow if is TestAPIController Config
-            return 'Method not supported for controller type', 400
 
         client = docker.from_env()
 
@@ -122,11 +129,8 @@ class GatewayDevice(Resource):
                                    for gateway_device in gateway_device_list
                                    if gateway_device['gateway_device_id'] == gateway_device_id]}
 
+    @Decorators.api_controller_type_verifier('True')
     def delete(self, gateway_device_id):
-
-        if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') != 'True':
-            # Allow if is TestAPIController Config
-            return 'Method not supported for controller type', 400
 
         client = docker.from_env()
 
@@ -145,17 +149,14 @@ class GatewayDevice(Resource):
 
         return {'result': True}
 
+    @Decorators.api_controller_type_verifier('False')
     def put(self, gateway_device_id):
-
-        if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') == 'True':
-            #Disallow if is TestAPIController Config
-            return 'Method not supported for controller type', 400
 
         self.reqparse.parse_args()
 
         new_gateway_properties = request.json['gateway_properties']
 
-        #TODO pass gateway params off to XMPP Component
+        # TODO pass gateway params off to XMPP Component
 
         gateway_device = [gateway_device for gateway_device in gateway_device_list
                           if gateway_device['gateway_device_id'] == gateway_device_id]
@@ -164,7 +165,8 @@ class GatewayDevice(Resource):
             abort(404)
 
         gateway_device = gateway_device[0]
-        old_gateway_properties = (gateway_device['gateway_properties'])
+
+        old_gateway_properties = gateway_device['gateway_properties']
 
         for key, value in new_gateway_properties.items():
             old_gateway_properties[key] = value

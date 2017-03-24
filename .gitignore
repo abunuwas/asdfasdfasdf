@@ -2,11 +2,11 @@
 .idea/*
 
 #Auto-generated documentation
-/docs/build
+docs/build
 
 #Python virtualenv - this should be created locally
-/venv
+venv
 
 #Compiled python
 __pycache__
-.pyc
+*.pyc

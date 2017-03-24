@@ -1,6 +1,7 @@
-from configReader import ConfigReader
 from flask_httpauth import HTTPBasicAuth
 from flask import jsonify, make_response
+
+from configReader import ConfigReader
 
 auth = HTTPBasicAuth()
 

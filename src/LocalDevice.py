@@ -1,8 +1,9 @@
-from flask import request
+from flask import request, abort
 from flask_restful import Resource, reqparse, fields, marshal
 
 from Auth import auth
-from configReader import ConfigReader
+
+import Decorators
 
 local_device_list = []
 
@@ -28,23 +29,17 @@ class LocalDevices(Resource):
                                    help='No device template provided', location='json')
         super(LocalDevices, self).__init__()
 
+    @Decorators.api_controller_type_verifier('False')
     def get(self, gateway_device_id):
 
         # TODO return all local devices for a gateway
-        if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') == 'True':
-            # Disallow if is TestAPIController Config
-            return 'Method not supported for controller type', 400
-
         return {'LocalDevices': [marshal(local_device, local_device_fields) for local_device in local_device_list
                                  if local_device['gateway_device_id'] == gateway_device_id]}
 
+    @Decorators.api_controller_type_verifier('False')
     def post(self, gateway_device_id):
 
         # TODO create local device
-        if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') == 'True':
-            # Disallow if is TestAPIController Config
-            return 'Method not supported for controller type', 400
-
         args = self.reqparse.parse_args()
 
         local_device = request.json
@@ -52,7 +47,11 @@ class LocalDevices(Resource):
         local_device['mac'] = args['mac']
         local_device['local_device_id'] = args['local_device_id']
         local_device['template_name'] = args['template_name']
-        local_device['local_device_properties'] = request.json['local_device_properties']
+
+        if request.json['local_device_properties']:
+            local_device['local_device_properties'] = request.json['local_device_properties']
+        else:
+            local_device['local_device_properties'] = {}
 
         local_device_list.append(local_device)
 
@@ -68,22 +67,15 @@ class LocalDevice(Resource):
                                    help='No local device properties provided', location='json')
         super(LocalDevice, self).__init__()
 
+    @Decorators.api_controller_type_verifier('False')
     def get(self, gateway_device_id, local_device_id):
-
-        # TODO return local device with properties
-        if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') == 'True':
-            # Disallow if is TestAPIController Config
-            return 'Method not supported for controller type', 400
 
         return {'LocalDevice': [marshal(local_device, local_device_fields) for local_device in local_device_list
                                 if local_device['gateway_device_id'] == gateway_device_id
                                 and local_device['local_device_id'] == local_device_id]}
 
+    @Decorators.api_controller_type_verifier('False')
     def put(self, gateway_device_id, local_device_id):
-
-        if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') == 'True':
-            # Disallow if is TestAPIController Config
-            return 'Method not supported for controller type', 400
 
         self.reqparse.parse_args()
 
@@ -95,7 +87,7 @@ class LocalDevice(Resource):
                         and local_device['local_device_id'] == local_device_id]
 
         if not local_device:
-            return 'Method not supported for controller type', 400
+            abort(404)
 
         local_device = local_device[0]
         old_props = (local_device['local_device_properties'])
@@ -105,11 +97,8 @@ class LocalDevice(Resource):
 
         return {'LocalDevice': marshal(local_device, local_device_fields)}
 
+    @Decorators.api_controller_type_verifier('False')
     def delete(self, gateway_device_id, local_device_id):
-
-        if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') == 'True':
-            # Allow if is TestAPIController Config
-            return 'Method not supported for controller type', 400
 
         # TODO remove local device
         local_device = [local_device for local_device in local_device_list
@@ -117,7 +106,7 @@ class LocalDevice(Resource):
                         and local_device['local_device_id'] == local_device_id]
 
         if not local_device:
-            return 'Method not supported for controller type', 400
+            abort(404)
 
         local_device_list.remove(local_device[0])
 

@@ -1,8 +1,9 @@
-from flask import request
+from flask import request, abort
 from flask_restful import Resource, reqparse, fields, marshal
 
 from Auth import auth
-from configReader import ConfigReader
+
+import Decorators
 
 device_template_list = []
 
@@ -23,30 +24,28 @@ class DeviceTemplates(Resource):
                                    help='No gateway device mac provided', location='json')
         super(DeviceTemplates, self).__init__()
 
+    @Decorators.api_controller_type_verifier('False')
     def get(self):
 
         # TODO return all device templates
-        if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') == 'True':
-            # Disallow if is TestAPIController Config
-            return 'Method not supported for controller type', 400
-
         return {'DeviceTemplates': [marshal(device_template, device_template_fields)
                                     for device_template in device_template_list]}
 
+    @Decorators.api_controller_type_verifier('False')
     def post(self, gateway_device_id, template_name):
 
         # TODO create new device template
-        if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') == 'True':
-            # Disallow if is TestAPIController Config
-            return 'Method not supported for controller type', 400
-
         args = self.reqparse.parse_args()
 
         device_template = request.json
         device_template['template_name'] = template_name
         device_template['gateway_device_id'] = gateway_device_id
         device_template['mac'] = args['mac']
-        device_template['template_properties'] = request.json['template_properties']
+
+        if request.json['template_properties']:
+            device_template['template_properties'] = request.json['template_properties']
+        else:
+            device_template['template_properties'] = {}
 
         device_template_list.append(device_template)
 
@@ -62,13 +61,10 @@ class DeviceTemplate(Resource):
                                    help='No template properties provided', location='json')
         super(DeviceTemplate, self).__init__()
 
+    @Decorators.api_controller_type_verifier('False')
     def put(self, gateway_device_id, template_name):
 
         # TODO update template properties
-        if ConfigReader.read_config_value('INSTANCETYPE', 'TestAPIController') == 'True':
-            # Disallow if is TestAPIController Config
-            return 'Method not supported for controller type', 400
-
         self.reqparse.parse_args()
 
         new_props = request.json['template_properties']

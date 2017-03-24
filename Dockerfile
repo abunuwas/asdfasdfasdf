@@ -29,4 +29,6 @@ WORKDIR /application/src
 # Expose port 5001 for uwsg
 EXPOSE 5001
  
+HEALTHCHECK --interval=2s --timeout=5s CMD curl http://localhost:5001 || exit 1
+
 ENTRYPOINT ["python3", "application.py"]
