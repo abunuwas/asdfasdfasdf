@@ -10,10 +10,10 @@ setup(name='controller',
       package_dir={'': 'src'},
       packages=find_packages('src'),
       install_requires=[
-          'boto3==1.4.0',
-          'pymssql==2.1.3',
-          'dnspython==1.15.0',
-          'sleekxmpp==1.3.1',
-          'awscli'
+          'curl==2017.0.1',
+          'docker==2.1.0',
+          'Flask==0.12',
+          'Flask-HTTPAuth==3.2.2',
+          'Flask-RESTful==0.3.5'
       ]
 )
