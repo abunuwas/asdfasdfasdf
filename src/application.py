@@ -6,9 +6,9 @@ from flask_restful import Api
 
 from gateway_device import GatewayDevices, GatewayDevice
 from device_template import DeviceTemplates, DeviceTemplate
-from localdevice import LocalDevices, LocalDevice
+from local_device import LocalDevices, LocalDevice
 from config_reader import ConfigReader
-from healthcheck import HealthCheck
+from health_check import HealthCheck
 
 app = Flask(__name__, static_url_path="")
 api = Api(app)
