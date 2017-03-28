@@ -1,1 +1,12 @@
+#yCharm project configuration
 .idea/*
+
+#Auto-generated documentation
+docs/build
+
+#Python virtualenv - this should be created locally
+venv
+
+#Compiled python
+__pycache__
+*.pyc
