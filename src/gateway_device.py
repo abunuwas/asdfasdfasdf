@@ -7,14 +7,13 @@ import subprocess
 from flask import request, abort
 from flask_restful import Resource, reqparse, fields, marshal
 
-from Auth import auth
-from configReader import ConfigReader
+from auth import auth
+from config_reader import ConfigReader
+import api_decorators
 
-import Decorators
+_gateway_device_list = []
 
-gateway_device_list = []
-
-gateway_device_fields = {
+_gateway_device_fields = {
     'gateway_device_id': fields.String,
     'docker_image': fields.String,
     'firmware_version': fields.String,
@@ -27,6 +26,7 @@ gateway_device_fields = {
 
 class GatewayDevices(Resource):
     decorators = [auth.login_required]
+    """Used for creating new containers, deleting all containers and retrieving a list of running containers"""
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -43,11 +43,21 @@ class GatewayDevices(Resource):
         super(GatewayDevices, self).__init__()
 
     def get(self):
+        """
+        Gets the list of existing containers
+        :return: List of existing containers
+        """
 
-        return {'GatewayDevices': [marshal(gateway_device, gateway_device_fields)
-                                   for gateway_device in gateway_device_list]}
+        return {'GatewayDevices': [marshal(gateway_device, _gateway_device_fields)
+                                   for gateway_device in _gateway_device_list]}
 
     def post(self):
+        """
+        Creates a new container for a gateway. When called as API Controller the container is created and started.  As
+        soon as the state of the container is 'healthy' then this method is called on the API within the container to
+        setup the container's gateway properties.
+        :return: The created gateway device
+        """
 
         is_test_controller = ConfigReader.read_config_value('INSTANCETYPE', 'IsTestAPIController')
 
@@ -76,29 +86,34 @@ class GatewayDevices(Resource):
                                   ports={str(container_host_port) + '/tcp': int(container_local_port)}
                                   )
 
-            # give the container a chance to start before calling it
-            while subprocess.check_output(["/usr/bin/docker", "inspect",  "-f", "{{.State.Health.Status}}", container_name]) != b"healthy\n":
+            # Give the container a chance to start before calling it
+            while subprocess.check_output(
+                    ["/usr/bin/docker", "inspect",  "-f",
+                     "{{.State.Health.Status}}", container_name]) != b"healthy\n":
                 time.sleep(1)
 
-            url = ConfigReader.read_config_value('INSTANCETYPE', 'APIControllerUri') + ':' \
-                + str(container_local_port) \
-                + '/gatewaydevices'
+            url = (ConfigReader.read_config_value('INSTANCETYPE', 'APIControllerUri')
+                   + ':' + str(container_local_port) + '/gatewaydevices')
 
             response = requests.post(url, data=json.dumps(gateway_device), headers=request.headers)
 
-            # add the gateway to this controller's list of gateway\containers
-            gateway_device_list.append(gateway_device)
+            # Add the gateway to this controller's list of gateway\containers
+            _gateway_device_list.append(gateway_device)
 
             return response.json(), 201
 
         else:
 
-            gateway_device_list.append(gateway_device)
+            _gateway_device_list.append(gateway_device)
 
-            return {'GatewayDevice': marshal(gateway_device, gateway_device_fields)}, 201
+            return {'GatewayDevice': marshal(gateway_device, _gateway_device_fields)}, 201
 
-    @Decorators.api_controller_type_verifier('True')
+    @api_decorators.api_controller_type_verifier('True')
     def delete(self):
+        """
+        Stops and removes all existing containers, clears the gateway device list
+        :return: True
+        """
 
         client = docker.from_env()
 
@@ -109,13 +124,14 @@ class GatewayDevices(Resource):
             container.stop()
             container.remove()
 
-        gateway_device_list.clear()
+        _gateway_device_list.clear()
 
         return {'result': True}
 
 
 class GatewayDevice(Resource):
     decorators = [auth.login_required]
+    """Used to update, return and delete single gateway instances"""
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -124,13 +140,23 @@ class GatewayDevice(Resource):
         super(GatewayDevice, self).__init__()
 
     def get(self, gateway_device_id):
+        """
+        Retrieves a gateway device based on the gateway device id
+        :param gateway_device_id: Unique name for the container
+        :return: A gateway device
+        """
 
-        return {'GatewayDevices': [marshal(gateway_device, gateway_device_fields)
-                                   for gateway_device in gateway_device_list
+        return {'GatewayDevices': [marshal(gateway_device, _gateway_device_fields)
+                                   for gateway_device in _gateway_device_list
                                    if gateway_device['gateway_device_id'] == gateway_device_id]}
 
-    @Decorators.api_controller_type_verifier('True')
+    @api_decorators.api_controller_type_verifier('True')
     def delete(self, gateway_device_id):
+        """
+        Stops and removes an existing containers and deletes a single gateway device from the list of existing gateways
+        :param gateway_device_id: Unique name for the container
+        :return: True
+        """
 
         client = docker.from_env()
 
@@ -141,16 +167,21 @@ class GatewayDevice(Resource):
             container.stop()
             container.remove()
 
-        gateway_device = [gateway_device for gateway_device in gateway_device_list
+        gateway_device = [gateway_device for gateway_device in _gateway_device_list
                           if gateway_device['gateway_device_id'] == gateway_device_id]
 
         if gateway_device:
-            gateway_device_list.remove(gateway_device[0])
+            _gateway_device_list.remove(gateway_device[0])
 
         return {'result': True}
 
-    @Decorators.api_controller_type_verifier('False')
+    @api_decorators.api_controller_type_verifier('False')
     def put(self, gateway_device_id):
+        """
+        Updates a gateway devices's properties, can only be called for API running in a container
+        :param gateway_device_id: Unique identifier for the container
+        :return: The updated gateway device
+        """
 
         self.reqparse.parse_args()
 
@@ -158,7 +189,7 @@ class GatewayDevice(Resource):
 
         # TODO pass gateway params off to XMPP Component
 
-        gateway_device = [gateway_device for gateway_device in gateway_device_list
+        gateway_device = [gateway_device for gateway_device in _gateway_device_list
                           if gateway_device['gateway_device_id'] == gateway_device_id]
 
         if not gateway_device:
@@ -171,4 +202,4 @@ class GatewayDevice(Resource):
         for key, value in new_gateway_properties.items():
             old_gateway_properties[key] = value
 
-        return {'GatewayDevice': marshal(gateway_device, gateway_device_fields)}
+        return {'GatewayDevice': marshal(gateway_device, _gateway_device_fields)}

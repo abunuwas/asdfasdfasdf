@@ -1,13 +1,12 @@
 from flask import request, abort
 from flask_restful import Resource, reqparse, fields, marshal
 
-from Auth import auth
+from auth import auth
+import api_decorators
 
-import Decorators
+_device_template_list = []
 
-device_template_list = []
-
-device_template_fields = {
+_device_template_fields = {
     'gateway_device_id': fields.String,
     'mac': fields.String,
     'template_name': fields.String,
@@ -17,6 +16,7 @@ device_template_fields = {
 
 class DeviceTemplates(Resource):
     decorators = [auth.login_required]
+    """Used for creating and returning local device templates within the container"""
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -24,17 +24,25 @@ class DeviceTemplates(Resource):
                                    help='No gateway device mac provided', location='json')
         super(DeviceTemplates, self).__init__()
 
-    @Decorators.api_controller_type_verifier('False')
+    @api_decorators.api_controller_type_verifier('False')
     def get(self):
+        """
+        Get a list of device templates within the container
+        :return: List of device templates
+        """
 
-        # TODO return all device templates
-        return {'DeviceTemplates': [marshal(device_template, device_template_fields)
-                                    for device_template in device_template_list]}
+        return {'DeviceTemplates': [marshal(device_template, _device_template_fields)
+                                    for device_template in _device_template_list]}
 
-    @Decorators.api_controller_type_verifier('False')
+    @api_decorators.api_controller_type_verifier('False')
     def post(self, gateway_device_id, template_name):
+        """
+        Creates a device template within the container
+        :param gateway_device_id: Unique name for the container
+        :param template_name: Description for the template
+        :return: Created device template
+        """
 
-        # TODO create new device template
         args = self.reqparse.parse_args()
 
         device_template = request.json
@@ -47,13 +55,14 @@ class DeviceTemplates(Resource):
         else:
             device_template['template_properties'] = {}
 
-        device_template_list.append(device_template)
+        _device_template_list.append(device_template)
 
-        return {'DeviceTemplates': marshal(device_template, device_template_fields)}, 201
+        return {'DeviceTemplates': marshal(device_template, _device_template_fields)}, 201
 
 
 class DeviceTemplate(Resource):
     decorators = [auth.login_required]
+    """Used for retrieving and updating individual device templates"""
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -61,15 +70,20 @@ class DeviceTemplate(Resource):
                                    help='No template properties provided', location='json')
         super(DeviceTemplate, self).__init__()
 
-    @Decorators.api_controller_type_verifier('False')
+    @api_decorators.api_controller_type_verifier('False')
     def put(self, gateway_device_id, template_name):
+        """
+        Updates the specified device template
+        :param gateway_device_id: Unique identifier for the container
+        :param template_name: Name of the template being updated
+        :return: The updated device template
+        """
 
-        # TODO update template properties
         self.reqparse.parse_args()
 
         new_props = request.json['template_properties']
 
-        device_template = [device_template for device_template in device_template_list
+        device_template = [device_template for device_template in _device_template_list
                            if device_template['gateway_device_id'] == gateway_device_id
                            and device_template['template_name'] == template_name]
 
@@ -82,4 +96,4 @@ class DeviceTemplate(Resource):
         for key, value in new_props.items():
             old_props[key] = value
 
-        return {'DeviceTemplate': marshal(device_template, device_template_fields)}
+        return {'DeviceTemplate': marshal(device_template, _device_template_fields)}

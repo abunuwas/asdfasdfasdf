@@ -4,10 +4,10 @@ import sys
 from flask import Flask, jsonify, make_response
 from flask_restful import Api
 
-from GatewayDevice import GatewayDevices, GatewayDevice
-from DeviceTemplate import DeviceTemplates, DeviceTemplate
-from LocalDevice import LocalDevices, LocalDevice
-from configReader import ConfigReader
+from gateway_device import GatewayDevices, GatewayDevice
+from device_template import DeviceTemplates, DeviceTemplate
+from localdevice import LocalDevices, LocalDevice
+from config_reader import ConfigReader
 from healthcheck import HealthCheck
 
 app = Flask(__name__, static_url_path="")
@@ -17,6 +17,12 @@ logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 @app.errorhandler(404)
 def not_found(error):
+    """
+    Handler for resource not found errors
+    :param error: Detailed error information
+    :return: 404 error
+    """
+
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 # health check end point
@@ -27,14 +33,17 @@ api.add_resource(GatewayDevices, '/gatewaydevices', endpoint='gatewaydevices')
 api.add_resource(GatewayDevice, '/gatewaydevices/<string:gateway_device_id>', endpoint='gatewaydevice')
 
 # device template end point
-api.add_resource(DeviceTemplates, '/devicetemplates/<string:gateway_device_id>/<string:template_name>',
+api.add_resource(DeviceTemplates,
+                 '/devicetemplates/<string:gateway_device_id>/<string:template_name>',
                  endpoint='devicetemplates')
-api.add_resource(DeviceTemplate, '/devicetemplates/<string:gateway_device_id>/<string:template_name>',
+api.add_resource(DeviceTemplate,
+                 '/devicetemplates/<string:gateway_device_id>/<string:template_name>',
                  endpoint='devicetemplate')
 
 # local device end points
 api.add_resource(LocalDevices, '/localdevices/<string:gateway_device_id>', endpoint='localdevices')
-api.add_resource(LocalDevice, '/localdevices/<string:gateway_device_id>/<string:local_device_id>',
+api.add_resource(LocalDevice,
+                 '/localdevices/<string:gateway_device_id>/<string:local_device_id>',
                  endpoint='localdevice')
 
 if ConfigReader.read_config_value('INSTANCETYPE', 'IsTestAPIController') == 'True':
