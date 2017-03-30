@@ -1,0 +1,7 @@
+<iq id="1557894" type="result" to="mzclientxmppapp@xmpp-cls-01.ami01.intamac.com/xmppadmin" from="12345667890ab@xmpp-cls-01.ami01.intamac.com/smarthub" xmlns="jabber:client">
+  <get-property xmlns="Intamac:get-property" rid="1557894" device="knetman" property="wifi-scan" type="100">
+    <property property="11:11:11:11:11:11 2427 -17 [WPA2-PSK-CCMP][WPS][ESS] TP-LINK_1302" type="string" />
+    <property property="22:22:22:22:22:22 2462 -69 [WPA-PSK-TKIP+CCMP][WPA2-PSK-TKIP+CCMP][WPS][ESS] OPTUS_7AE4F9" type="string" />
+    <property property="33:33:33:33:33:33 2412 -94 [WPA2-PSK-CCMP][WPS][ESS] Telstra2FDE" type="string" />
+  </get-property>
+</iq> 

@@ -1,0 +1,3 @@
+<message id="55260" type="chat" to="mzclientxmppapp@xmpp-cls-01.ami01.intamac.com/xmppadmin" from="6ceceba278fb@xmpp-cls-01.ami01.intamac.com/smarthub" xmlns="jabber:client">
+  <property xmlns="Intamac:property" device="zigbeed.Thermostat.00244600000ee9c2" property="stat.LocalTemp" type="1" value="3100" />
+</message>

@@ -10,21 +10,13 @@ from flask_restful import Resource, reqparse, fields, marshal
 from auth import auth
 from config_reader import ConfigReader
 import api_decorators
-
-_gateway_device_list = []
-
-_gateway_device_fields = {
-    'gateway_device_id': fields.String,
-    'docker_image': fields.String,
-    'firmware_version': fields.String,
-    'mac': fields.String,
-    'agent_type': fields.String,
-    'gateway_properties': fields.String,
-    'container_port': fields.Integer
-}
+from src import _gateway_device_list, _gateway_device_fields
 
 
 class GatewayDevices(Resource):
+    """
+    url endpoint: /gatewadevices
+    """
     decorators = [auth.login_required]
     """Used for creating new containers, deleting all containers and retrieving a list of running containers"""
 
@@ -42,6 +34,7 @@ class GatewayDevices(Resource):
                                    help='No agent type provided', location='json')
         super(GatewayDevices, self).__init__()
 
+    @api_decorators.api_controller_type_verifier('True')
     def get(self):
         """
         Gets the list of existing containers
@@ -116,20 +109,19 @@ class GatewayDevices(Resource):
         """
 
         client = docker.from_env()
-
         if client:
             containers = client.containers.list()
-
         for container in containers:
             container.stop()
             container.remove()
-
         _gateway_device_list.clear()
-
         return {'result': True}
 
 
 class GatewayDevice(Resource):
+    """
+    url endpoint: /gatewaydevices/<string:gatewaydeviceid>
+    """
     decorators = [auth.login_required]
     """Used to update, return and delete single gateway instances"""
 
@@ -139,13 +131,13 @@ class GatewayDevice(Resource):
                                    help='No gateway properties provided', location='json')
         super(GatewayDevice, self).__init__()
 
+    @api_decorators.api_controller_type_verifier('False')
     def get(self, gateway_device_id):
         """
         Retrieves a gateway device based on the gateway device id
         :param gateway_device_id: Unique name for the container
         :return: A gateway device
         """
-
         return {'GatewayDevices': [marshal(gateway_device, _gateway_device_fields)
                                    for gateway_device in _gateway_device_list
                                    if gateway_device['gateway_device_id'] == gateway_device_id]}
@@ -157,22 +149,16 @@ class GatewayDevice(Resource):
         :param gateway_device_id: Unique name for the container
         :return: True
         """
-
         client = docker.from_env()
-
         if client:
             container = client.containers.get(gateway_device_id)
-
         if container:
             container.stop()
             container.remove()
-
         gateway_device = [gateway_device for gateway_device in _gateway_device_list
                           if gateway_device['gateway_device_id'] == gateway_device_id]
-
         if gateway_device:
             _gateway_device_list.remove(gateway_device[0])
-
         return {'result': True}
 
     @api_decorators.api_controller_type_verifier('False')
@@ -182,24 +168,16 @@ class GatewayDevice(Resource):
         :param gateway_device_id: Unique identifier for the container
         :return: The updated gateway device
         """
-
         self.reqparse.parse_args()
-
         new_gateway_properties = request.json['gateway_properties']
 
         # TODO pass gateway params off to XMPP Component
-
         gateway_device = [gateway_device for gateway_device in _gateway_device_list
                           if gateway_device['gateway_device_id'] == gateway_device_id]
-
         if not gateway_device:
             abort(404)
-
         gateway_device = gateway_device[0]
-
         old_gateway_properties = gateway_device['gateway_properties']
-
         for key, value in new_gateway_properties.items():
             old_gateway_properties[key] = value
-
         return {'GatewayDevice': marshal(gateway_device, _gateway_device_fields)}

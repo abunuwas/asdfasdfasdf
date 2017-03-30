@@ -1,0 +1,3 @@
+<iq id="1557090" type="get" to="84eb18cee1fc@xmpp-cls-01.ami01.intamac.com/smarthub" xmlns="jabber:client">
+  <add-asset id="1557090" url="https://upgrade.swann.intamac.com/ExternalAssets/SWA/SWA204678/T14569/RS/1470009571/rules_script.txt" key="81422D7AF8693C17A75CF27E48F803536070C6C452B68181EB79D5A3319B87ED" hash="829CD5364AA89AB16775E9168FA5366C55861FD62D3EF3C0ECB018604BC9FE64" name="rules_script.txt" xmlns="Intamac:add-asset" />
+</iq>

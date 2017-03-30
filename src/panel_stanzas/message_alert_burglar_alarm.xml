@@ -1,0 +1,3 @@
+<message id="42" type="chat" to="mzclientxmppapp@xmpp-cls-01.ami01.intamac.com/xmppadmin" from="68c90b4cf947@xmpp-cls-01.ami01.intamac.com/smarthub" xmlns="jabber:client">
+  <alert xmlns="Intamac:alert" id="135268" alert="Burglary-Away" source="zigbeed.MotionSensor.00124b00063c296b" timestamp="1478563175" />
+</message> 

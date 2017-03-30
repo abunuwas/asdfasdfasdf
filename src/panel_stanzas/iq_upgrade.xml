@@ -1,0 +1,3 @@
+<iq id="MX_51678669" type="result" to="component@component.muc.com" from="d05fb880d0db@xmpp-cls-01.ami01.intamac.com/smarthub" xmlns="jabber:client">
+  <upgrade rid="MX_51678669" url="https://upgrade.swann.intamac.com/op-1.52_network_boot_order_fix.fw" key="6eb652355aea3a14c343a831a247b3f85b36001ce80e2786f14456d531624dac" hash="9c8ee8928f32ddba3a8b228bc9a88276ff28a8bb497542cadf1e97b094850999" status="200" xmlns="Intamac:upgrade" />
+</iq>

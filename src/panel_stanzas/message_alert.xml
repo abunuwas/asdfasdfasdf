@@ -1,0 +1,3 @@
+<message id="2190" type="chat" to="mzclientxmppapp@xmpp-cls-01.ami01.intamac.com/xmppadmin" from="84eb18ceb80d@xmpp-cls-01.ami01.intamac.com/smarthub" xmlns="jabber:client">
+  <alert xmlns="Intamac:alert" id="14147" alert="Car_AlarmEnd" source="aad" timestamp="1470013199" />
+</message>

@@ -1,0 +1,5 @@
+<iq id="hue.001788fffe29a860.light.2" type="result" to="mzclientxmppapp@xmpp-cls-01.ami01.intamac.com/xmppadmin" from="6ceceba29921@xmpp-cls-01.ami01.intamac.com/smarthub" xmlns="jabber:client">
+  <get-property xmlns="Intamac:get-property" rid="hue.001788fffe29a860.light.2" device="001788fffe29a860.light.2" property="state" type="0">
+    <property property="{ &quot;bri&quot; : 254, &quot;colormode&quot; : &quot;ct&quot;, &quot;ct&quot; : 370, &quot;effect&quot; : &quot;none&quot;, &quot;hue&quot; : 14910, &quot;manufacturername&quot; : &quot;Philips&quot;, &quot;modelid&quot; : &quot;LCT007&quot;, &quot;name&quot; : &quot;Hue color lamp 2&quot;, &quot;on&quot; : true, &quot;reachable&quot; : false, &quot;sat&quot; : 144, &quot;swversion&quot; : &quot;5.38.1.14919&quot;, &quot;type&quot; : &quot;Extended color light&quot; }" type="string" />
+  </get-property>
+</iq>

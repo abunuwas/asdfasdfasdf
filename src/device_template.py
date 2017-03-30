@@ -3,15 +3,8 @@ from flask_restful import Resource, reqparse, fields, marshal
 
 from auth import auth
 import api_decorators
+from src import _device_template_list, _device_template_fields
 
-_device_template_list = []
-
-_device_template_fields = {
-    'gateway_device_id': fields.String,
-    'mac': fields.String,
-    'template_name': fields.String,
-    'template_properties': fields.String
-}
 
 
 class DeviceTemplates(Resource):
@@ -30,7 +23,6 @@ class DeviceTemplates(Resource):
         Get a list of device templates within the container
         :return: List of device templates
         """
-
         return {'DeviceTemplates': [marshal(device_template, _device_template_fields)
                                     for device_template in _device_template_list]}
 
@@ -42,9 +34,7 @@ class DeviceTemplates(Resource):
         :param template_name: Description for the template
         :return: Created device template
         """
-
         args = self.reqparse.parse_args()
-
         device_template = request.json
         device_template['template_name'] = template_name
         device_template['gateway_device_id'] = gateway_device_id

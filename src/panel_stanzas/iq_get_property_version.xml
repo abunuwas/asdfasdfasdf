@@ -1,0 +1,9 @@
+<iq id="MX_51738975" type="result" to="mzclientxmppapp@xmpp-cls-01.ami01.intamac.com/xmppadmin" from="84eb189cf1f6@xmpp-cls-01.ami01.intamac.com/smarthub" xmlns="jabber:client">
+  <get-property xmlns="Intamac:get-property" rid="MX_51738975" device="hub" property="version" type="100">
+    <property property="1" type="string" />
+    <property property="intouch" type="string" />
+    <property property="1" type="string" />
+    <property property="52" type="string" />
+    <property property="swann_one_intamac_swann" type="string" />
+  </get-property>
+</iq>

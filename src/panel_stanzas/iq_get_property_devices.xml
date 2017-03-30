@@ -1,0 +1,14 @@
+<iq id="MX_51738977" type="result" to="mzclientxmppapp@xmpp-cls-01.ami01.intamac.com/xmppadmin" from="84eb189cf1f6@xmpp-cls-01.ami01.intamac.com/smarthub" xmlns="jabber:client">
+  <get-property xmlns="Intamac:get-property" rid="MX_51738977" device="hub" property="devices" type="100">
+    <property property="zigbeed.MotionSensor.00124b0005aae500" type="string" />
+    <property property="zigbeed.MotionSensor.00124b00061d09ef" type="string" />
+    <property property="zigbeed.DoorContact.00124b00061d649a" type="string" />
+    <property property="zigbeed.DoorContact.00124b00061e4647" type="string" />
+    <property property="zigbeed.DoorContact.00124b00061fd679" type="string" />
+    <property property="zigbeed.KeyFob.00124b00061fe280" type="string" />
+    <property property="zigbeed.KeyFob.00124b00061fe2cd" type="string" />
+    <property property="zigbeed.KeyFob.00124b00061fe30c" type="string" />
+    <property property="zigbeed.IndoorSiren.00124b000621bc3b" type="string" />
+    <property property="zigbeed.KeyFob.00124b000625a638" type="string" />
+  </get-property>
+</iq>

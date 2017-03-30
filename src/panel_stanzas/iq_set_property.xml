@@ -1,0 +1,3 @@
+<iq id="1557006" type="result" to="mzclientxmppapp@xmpp-cls-01.ami01.intamac.com/xmppadmin" from="544a16a07efc@xmpp-cls-01.ami01.intamac.com/smarthub" xmlns="jabber:client">
+  <set-property xmlns="Intamac:set-property" rid="1557006" status="200" />
+</iq>

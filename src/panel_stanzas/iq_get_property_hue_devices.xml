@@ -1,0 +1,12 @@
+<iq id="0" type="result" to="mzclientxmppapp@xmpp-cls-01.ami01.intamac.com/xmppadmin" from="6ceceba29921@xmpp-cls-01.ami01.intamac.com/smarthub" xmlns="jabber:client">
+  <get-property xmlns="Intamac:get-property" rid="0" device="hub" property="devices" type="100">
+      <property property="hue.001788fffe29a860.bridge" type="string" />
+      <property property="hue.001788fffe29a860.light.2" type="string" />
+    <property property="hue.001788fffe29a860.light.4" type="string" />
+    <property property="hue.001788fffe29a860.light.5" type="string" />
+    <property property="hue.001788fffe29a860.light.6" type="string" />
+    <property property="hue.001788fffe29a860.group.1" type="string" />
+    <property property="hue.001788fffe29a860.group.2" type="string" />
+    <property property="hue.001788fffe29a860.group.3" type="string" />
+  </get-property>
+</iq> 

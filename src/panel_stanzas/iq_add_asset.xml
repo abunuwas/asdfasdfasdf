@@ -1,0 +1,3 @@
+<iq id="1557089" type="result" to="mzclientxmppapp@xmpp-cls-01.ami01.intamac.com/xmppadmin" from="84eb18cee1fc@xmpp-cls-01.ami01.intamac.com/smarthub" xmlns="jabber:client">
+  <add-asset xmlns="Intamac:add-asset" rid="1557089" status="200" />
+</iq>

@@ -1,8 +1,15 @@
+import logging
+import sys
+from xml.etree import ElementTree as ET
+
 from flask import request, abort
 from flask_restful import Resource, reqparse, fields, marshal
 
 from auth import auth
 import api_decorators
+from src import _device_template_list, xmpp_component
+
+logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 _local_device_list = []
 
@@ -13,6 +20,13 @@ _local_device_fields = {
     'local_device_properties': fields.String,
     'template_name': fields.String
 }
+
+
+template_message = """
+<message to="spruehubclientxmppapp@component.sprue/xmppadmin" type="chat" from="883314fed468@use-xmpp-01/smarthub" id="737">
+    <alert xmlns="Intamac:alert" source="{local_device_id}" timestamp="{timestamp}" alert="{alert}" sequence="{sequence}" code="{code}" status="{status}" id="{id}" />
+</message>
+"""
 
 
 class LocalDevices(Resource):
@@ -56,13 +70,20 @@ class LocalDevices(Resource):
         local_device['mac'] = args['mac']
         local_device['local_device_id'] = args['local_device_id']
         local_device['template_name'] = args['template_name']
+        for template in _device_template_list:
+            if template['template_name'] == args['template_name']:
+                local_device['local_device_properties'] = template['template_properties']
 
         if request.json['local_device_properties']:
-            local_device['local_device_properties'] = request.json['local_device_properties']
-        else:
-            local_device['local_device_properties'] = {}
+            local_device['local_device_properties'].update(request.json['local_device_properties'])
+
+        local_device['local_device_properties'].update({'local_device_id': local_device['local_device_id']})
 
         _local_device_list.append(local_device)
+
+        stanza = template_message.format(**local_device['local_device_properties'])
+        stanza_xml = ET.fromstring(stanza)
+        xmpp_component._XMLStream__spawn_event(stanza_xml)
 
         return {'LocalDevices': marshal(local_device, _local_device_fields)}, 201
 
